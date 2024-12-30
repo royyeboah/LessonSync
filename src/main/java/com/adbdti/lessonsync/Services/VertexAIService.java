@@ -35,7 +35,7 @@ public class VertexAIService {
             var image1 = PartMaker.fromMimeTypeAndData(
                     "image/jpg", image1Bytes);
             var text1 = "Extract the schedule in this image into json format. Use different entries for start time and end time. " +
-                    "Exclude time slot and replace the shorthand versions of the days with their full days";
+                    "Exclude time slot and replace the shorthand versions of the days with their full names";
 
             var content = ContentMaker.fromMultiModalData(image1, text1);
 
@@ -63,21 +63,6 @@ public class VertexAIService {
             return "Error: " + e.getMessage();
         }
 
-    }
-
-    private String getDayName(String day) {
-        Map<String, String> dayMap = Map.of(
-                "Mo", "monday",
-                "Tu", "tuesday",
-                "We", "wednesday",
-                "Th", "thursday",
-                "Fr", "friday"
-        );
-        return dayMap.get(day);
-    }
-
-    private String formatTime(String time) {
-        return time.replaceFirst("^0", "");
     }
 
     public String getRawResponse() {
