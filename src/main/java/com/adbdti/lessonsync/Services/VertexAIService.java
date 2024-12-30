@@ -40,14 +40,15 @@ public class VertexAIService {
 
             GenerativeModel model = new GenerativeModel("gemini-2.0-flash-exp", vertexAi);
 
-            File image1File = new File("C:\\Users\\nserviceebanking\\IdeaProjects\\LessonSync\\src\\main\\resources\\static\\TESTTABLE.jpg");
+            File image1File = new File("C:\\Users\\roy\\Documents\\LessonSync\\src\\main\\resources\\static\\TESTTABLE.jpg");
             byte[] image1Bytes = new byte[(int) image1File.length()];
             try (FileInputStream image1FileInputStream = new FileInputStream(image1File)) {
                 image1FileInputStream.read(image1Bytes);
             }
             var image1 = PartMaker.fromMimeTypeAndData(
                     "image/jpg", image1Bytes);
-            var text1 = "Can you extract the schedule in the image in json format can you add new entries in the json for start time and end time";
+            var text1 = "Extract the schedule in this image into json format. Use different entries for start time and end time. " +
+                    "Exclude time slot and replace the shorthand versions of the days with their full days";
 
             var content = ContentMaker.fromMultiModalData(image1, text1);
 
@@ -65,54 +66,11 @@ public class VertexAIService {
                 });
             });
 
-            String cleanJson = jsonContent.toString()
+            // Remove Markdown code blocks
+
+            return jsonContent.toString()
                     .replaceAll("```(?:json)?|```", "") // Remove Markdown code blocks
                     .trim();
-
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                JsonNode rootNode = mapper.readTree(cleanJson);
-                JsonNode scheduleArray = rootNode.get("schedule");
-
-                ObjectNode result = mapper.createObjectNode();
-                ObjectNode scheduleNode = result.putObject("schedule");
-
-                Map<String, List<JsonNode>> groupedByDay = StreamSupport
-                        .stream(scheduleArray.spliterator(), false)
-                        .collect(Collectors.groupingBy(item ->
-                                getDayName(item.get("day").asText())));
-
-                groupedByDay.forEach((day, items) -> {
-                    ArrayNode dayArray = scheduleNode.putArray(day.toLowerCase());
-                    items.stream()
-                            .sorted(Comparator.comparing(item -> item.get("start_time").asText()))
-                            .forEach(item -> {
-                                ObjectNode entry = dayArray.addObject();
-                                entry.put("course", item.get("course").asText());
-
-                                // Handle optional group field
-                                if (item.has("group") && !item.get("group").isNull()) {
-                                    entry.put("group", item.get("group").asText().split(" ")[1]);
-                                }
-
-                                entry.put("lecturer", item.get("lecturer").asText());
-
-                                // Handle optional location field
-                                if (item.has("location") && !item.get("location").isNull()) {
-                                    entry.put("location", item.get("location").asText());
-                                }
-
-                                entry.put("start_time", formatTime(item.get("start_time").asText()));
-                                entry.put("end_time", formatTime(item.get("end_time").asText()));
-                            });
-                });
-
-                return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
-            } catch (JsonProcessingException e) {
-                logger.error("Failed to parse JSON:{}", cleanJson);
-                logger.error(e.getMessage(), e);
-                throw new RuntimeException("Failed to parse schedule", e);
-            }
 
         } catch (Exception e) {
             return "Error: " + e.getMessage();
@@ -139,14 +97,14 @@ public class VertexAIService {
         try (VertexAI vertexAi = new VertexAI("class-scheduler-429214", "us-central1")) {
             GenerativeModel model = new GenerativeModel("gemini-2.0-flash-exp", vertexAi);
 
-            File image1File = new File("C:\\Users\\nserviceebanking\\IdeaProjects\\LessonSync\\src\\main\\resources\\static\\TESTTABLE.jpg");
+            File image1File = new File("C:\\Users\\roy\\Documents\\LessonSync\\src\\main\\resources\\static\\img.png");
             byte[] image1Bytes = new byte[(int) image1File.length()];
             try (FileInputStream image1FileInputStream = new FileInputStream(image1File)) {
                 image1FileInputStream.read(image1Bytes);
             }
             var image1 = PartMaker.fromMimeTypeAndData(
-                    "image/jpg", image1Bytes);
-            var text1 = "Can you extract the schedule in the image in json format can you add new entries in the json for start time and end time";
+                    "image/png", image1Bytes);
+            var text1 = "What animal in this picture? Can you explain how the dog could get in that situation in the first place?";
 
             var content = ContentMaker.fromMultiModalData(image1, text1);
             ResponseStream<GenerateContentResponse> responseStream = model.generateContentStream(content);
