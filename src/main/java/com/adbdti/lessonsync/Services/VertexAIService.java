@@ -34,8 +34,34 @@ public class VertexAIService {
             }
             var image1 = PartMaker.fromMimeTypeAndData(
                     "image/jpg", image1Bytes);
-            var text1 = "Extract the schedule in this image into json format. Use different entries for start time and end time. " +
-                    "Exclude time slot and replace the shorthand versions of the days with their full names";
+            var text1 = """
+                    Extract the schedule in this image into json format. Use different entries for start time and end time. \
+                    Exclude time slot and replace the shorthand versions of the days with their full names\
+                    Also, exclude the "schedule" and just return the schedule without it\
+                    Give it to me directly like this {
+                                                           "day": "Monday",
+                                                           "start_time": "08:00",
+                                                           "end_time": "08:55",
+                                                           "course": "CSM 387",
+                                                            "group": "1",
+                                                           "lecturer": "D. ASAMOAH",
+                                                            "location":"SCB-SF8"
+                                                         },
+                                                          {
+                                                           "day": "Monday",
+                                                            "start_time": "13:00",
+                                                           "end_time": "13:55",
+                                                           "course": "CSM 399",
+                                                            "group": "1",
+                                                           "lecturer": "L.A. BANNING",
+                                                              "location":"SCB-GF17"
+                                                         } and not like this "Monday": [
+                        {
+                          "start_time": "8:00",
+                          "end_time": "8:55",
+                          "course": "CSM 387",
+                          "group": "Group 1",
+                          "lecturer": "D. ASAMOAH",""";
 
             var content = ContentMaker.fromMultiModalData(image1, text1);
 
