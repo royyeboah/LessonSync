@@ -61,7 +61,9 @@ public class VertexAIService {
                           "end_time": "8:55",
                           "course": "CSM 387",
                           "group": "Group 1",
-                          "lecturer": "D. ASAMOAH",""";
+                          "lecturer": "D. ASAMOAH",
+                          Also return the times and dates in this format 2025-06-03T10:00:00.000 and vary them and actually match them so they correspond with real dates. As in the date will correspond with the day of the week it falls on
+                          """;
 
             var content = ContentMaker.fromMultiModalData(image1, text1);
 

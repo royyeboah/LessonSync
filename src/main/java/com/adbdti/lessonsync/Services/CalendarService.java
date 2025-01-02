@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import com.adbdti.lessonsync.Model.Lecture;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +42,8 @@ public class CalendarService {
 
         try{
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(json, new TypeReference<List<Map<String, String>>>(){});
+            return mapper.readValue(json, new TypeReference<>() {
+            });
 
         } catch(Exception e) {
             logger.error(e.getMessage());
@@ -53,6 +55,7 @@ public class CalendarService {
 
         List<Map<String, String>> timetableList = parseJson(jsonString);
         TimeTable timeTable = new TimeTable();
+        timeTable.setEndDate(LocalDateTime.of(2025,6,25,12,45,45));
         timeTable = timeTableRepository.save(timeTable);
 
         if(timetableList == null || timetableList.isEmpty()){
@@ -70,13 +73,13 @@ public class CalendarService {
             }
 
             lecture.setCourse(timetableMap.get("course"));
-            lecture.setLecturer_name(timetableMap.get("lecturer"));  // Note: JSON has "lecturer", not "lecturer_name"
+            lecture.setLecturer_name(timetableMap.get("lecturer"));
             lecture.setStart_time(timetableMap.get("start_time"));
             lecture.setEnd_time(timetableMap.get("end_time"));
             lecture.setDay(timetableMap.get("day"));
             lecture.setLocation(timetableMap.get("location"));
-            lecture.setGroupName(timetableMap.get("group"));  // Assuming you have a setGroup method
-            lecture.setTime_table(timeTable);  // Set the relationship
+            lecture.setGroupName(timetableMap.get("group"));
+            lecture.setTime_table(timeTable);
 
             lectures.add(lecture);
 
