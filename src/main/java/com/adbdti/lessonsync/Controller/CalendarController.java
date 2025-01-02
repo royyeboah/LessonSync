@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
@@ -67,4 +68,11 @@ public class CalendarController {
         
         return ResponseEntity.ok(eventLinks);
     }
+
+    @GetMapping("/createCalendar")
+    public ResponseEntity<String> createCalendar(@RequestParam String name) throws Exception{
+
+        return ResponseEntity.ok(googleCalendarService.createTimeTable(name));
+    }
+
 }

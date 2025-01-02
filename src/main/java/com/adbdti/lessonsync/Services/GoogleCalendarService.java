@@ -21,7 +21,16 @@ public class GoogleCalendarService {
     @Autowired
     private Calendar calendar;
 
+    public String createTimeTable(String name) throws IOException {
 
+        com.google.api.services.calendar.model.Calendar timeTable = new com.google.api.services.calendar.model.Calendar();
+        timeTable.setSummary(name);
+        timeTable.setTimeZone("UTC");
+
+        com.google.api.services.calendar.model.Calendar createdCalendar = calendar.calendars().insert(timeTable).execute();
+        return createdCalendar.getId();
+
+    }
 
     public String createLecture(String name, String location, String lecturer_name
     , LocalDateTime start, LocalDateTime end, String lecturesEndDate) throws IOException {
