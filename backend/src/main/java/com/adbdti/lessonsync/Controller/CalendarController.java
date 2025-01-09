@@ -63,6 +63,8 @@ public class CalendarController {
             );
             eventLinks.add(eventLink);
         }
+
+        timeTableRepository.deleteAll();
         
         return ResponseEntity.ok(eventLinks);
     }
