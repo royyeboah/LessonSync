@@ -1,39 +1,33 @@
 package com.adbdti.lessonsync.Services;
 
-
 import com.google.cloud.vertexai.api.*;
 import com.google.cloud.vertexai.generativeai.ContentMaker;
 import com.google.cloud.vertexai.generativeai.GenerativeModel;
 import com.google.cloud.vertexai.generativeai.PartMaker;
 import com.google.cloud.vertexai.generativeai.ResponseStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.google.cloud.vertexai.VertexAI;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileInputStream;
 
-import java.util.Map;
+import java.util.Objects;
 
 
 @Service
 public class VertexAIService {
 
-    Logger logger = LoggerFactory.getLogger(VertexAIService.class);
-
-    public String generateContent() {
+    public String generateContent(MultipartFile file) {
         try (VertexAI vertexAi = new VertexAI("class-scheduler-429214", "us-central1");) {
 
             GenerativeModel model = new GenerativeModel("gemini-2.0-flash-exp", vertexAi);
 
-            File image1File = new File("C:\\Users\\roy\\Documents\\LessonSync\\backend\\src\\main\\resources\\static\\TESTTABLE.jpg");
-            byte[] image1Bytes = new byte[(int) image1File.length()];
-            try (FileInputStream image1FileInputStream = new FileInputStream(image1File)) {
-                image1FileInputStream.read(image1Bytes);
-            }
+
+            byte[] image1Bytes = file.getBytes();
+
             var image1 = PartMaker.fromMimeTypeAndData(
-                    "image/jpg", image1Bytes);
+                    Objects.requireNonNull(file.getContentType()), image1Bytes);
             var text1 = """
                     Extract the schedule in this image into json format. Use different entries for start time and end time. \
                     Exclude time slot and replace the shorthand versions of the days with their full names\
@@ -62,7 +56,7 @@ public class VertexAIService {
                           "course": "CSM 387",
                           "group": "Group 1",
                           "lecturer": "D. ASAMOAH",
-                          """;
+                         \s""";
 
             var content = ContentMaker.fromMultiModalData(image1, text1);
 

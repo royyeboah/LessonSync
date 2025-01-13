@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -40,9 +41,9 @@ public class CalendarController {
     }
 
     @PostMapping("/lecture")
-    public TimeTable timetable() {
+    public TimeTable timetable(@RequestParam("file")MultipartFile file) {
 
-        String jsonString = vertexAIService.generateContent();
+        String jsonString = vertexAIService.generateContent(file);
 
         return calendarService.insertTimetable(jsonString);
     }

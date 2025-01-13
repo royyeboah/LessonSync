@@ -58,10 +58,18 @@ public class OAuthGoogle {
                 HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
                 .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
                 .setAccessType("offline")
+                .setApprovalPrompt("force")
                 .build();
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8080).build();
+
+        Credential credential = new AuthorizationCodeInstalledApp(flow,receiver).authorize("user");
+
+        if (credential.getExpiresInSeconds() != null && credential.getExpiresInSeconds() <= 60) {
+            credential.refreshToken();
+        }
+
         //returns an authorized Credential object.
-        return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+        return credential;
     }
 
 
