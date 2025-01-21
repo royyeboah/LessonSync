@@ -37,15 +37,7 @@ public class Lecture {
 
     private String timeTableId;
 
-    public Integer getColorId() {
-        return colorId;
-    }
 
-    public void setColorId(Integer colorId) {
-        this.colorId = colorId;
-    }
-
-    private Integer colorId;
 
     public String getId() {
         return id;

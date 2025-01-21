@@ -59,7 +59,6 @@ public class CalendarController {
                 lecture.getLecturerName(),
                 lecture.getStart_time(),
                 lecture.getEnd_time(),
-                lecture.getColorId(),
                 reminderTime
             );
             eventLinks.add(eventLink);
@@ -96,7 +95,6 @@ public class CalendarController {
             if (updatedLecture.getStart_time() != null) lecture.setStart_time(updatedLecture.getStart_time());
             if (updatedLecture.getEnd_time() != null) lecture.setEnd_time(updatedLecture.getEnd_time());
             if (updatedLecture.getTimeTableId() != null) lecture.setTimeTableId(updatedLecture.getTimeTableId());
-            if (updatedLecture.getColorId() !=null) lecture.setColorId(updatedLecture.getColorId());
             
             Lecture savedLecture = lectureRepository.save(lecture);
             return ResponseEntity.ok(savedLecture);

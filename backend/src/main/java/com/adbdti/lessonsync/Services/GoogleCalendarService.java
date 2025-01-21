@@ -49,7 +49,7 @@ public class GoogleCalendarService {
     }
 
     public String createLecture(String name, String location, String lecturer_name
-    , String start, String end, int colorId, int reminderTime) throws IOException {
+    , String start, String end, int reminderTime) throws IOException {
 
         List<TimeTable> timeTableList = (List<TimeTable>) timeTableRepository.findAll();
         TimeTable timeTable = timeTableList.get(0);
@@ -59,11 +59,11 @@ public class GoogleCalendarService {
         event.setSummary(name);
         event.setLocation(location);
         event.setDescription(lecturer_name);
-        event.setColorId(String.valueOf(colorId));
 
         EventReminder[] reminderOverrides = new EventReminder[] {
                 new EventReminder().setMethod("popup").setMinutes(reminderTime)
         };
+
 
         LocalTime justStartTime = LocalTime.parse(start);
         LocalTime justEndTime = LocalTime.parse(end);
