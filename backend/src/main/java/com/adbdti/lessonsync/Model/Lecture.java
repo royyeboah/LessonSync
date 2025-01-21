@@ -16,6 +16,15 @@ public class Lecture {
     @Indexed
     private String course;
 
+    public Integer getReminderTime() {
+        return reminderTime;
+    }
+
+    public void setReminderTime(Integer reminderTime) {
+        this.reminderTime = reminderTime;
+    }
+
+    private Integer reminderTime;
 
     private String location;
 
@@ -27,6 +36,16 @@ public class Lecture {
     private String end_time;
 
     private String timeTableId;
+
+    public Integer getColorId() {
+        return colorId;
+    }
+
+    public void setColorId(Integer colorId) {
+        this.colorId = colorId;
+    }
+
+    private Integer colorId;
 
     public String getId() {
         return id;

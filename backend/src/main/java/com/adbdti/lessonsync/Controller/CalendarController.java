@@ -9,10 +9,7 @@ import com.adbdti.lessonsync.Services.GoogleCalendarService;
 import com.adbdti.lessonsync.Services.VertexAIService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -20,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class CalendarController {
@@ -50,7 +48,7 @@ public class CalendarController {
 
 
     @GetMapping("/createEvents")
-    public ResponseEntity<List<String>> postAllLectures() throws IOException {
+    public ResponseEntity<List<String>> postAllLectures(@RequestParam Integer reminderTime) throws IOException {
         List<Lecture> lectures = (List<Lecture>) lectureRepository.findAll();
         List<String> eventLinks = new ArrayList<>();
         
@@ -60,7 +58,9 @@ public class CalendarController {
                 lecture.getLocation(),
                 lecture.getLecturerName(),
                 lecture.getStart_time(),
-                lecture.getEnd_time()
+                lecture.getEnd_time(),
+                lecture.getColorId(),
+                reminderTime
             );
             eventLinks.add(eventLink);
         }
@@ -71,10 +71,38 @@ public class CalendarController {
     }
 
     @PostMapping("/createCalendar")
-    public ResponseEntity<String> createCalendar(@RequestParam String name,@RequestParam LocalDateTime startDate, @RequestParam LocalDateTime endDate) throws Exception{
+    public ResponseEntity<String> createCalendar(@RequestBody TimeTable timetable) throws Exception{
 
-        return ResponseEntity.ok(googleCalendarService.createTimeTable(name,startDate, endDate));
+        return ResponseEntity.ok(googleCalendarService.createTimeTable(timetable.getName(),timetable.getStartDate(), timetable.getEndDate()));
     }
 
+    @GetMapping("/lectures")
+    public List<Lecture> getAllLectures(){
+        return (List<Lecture>) lectureRepository.findAll();
+    }
+
+    @PutMapping("/lecture/{id}")
+    public ResponseEntity<Lecture> editLecture(@PathVariable String id, @RequestBody Lecture updatedLecture) {
+        Optional<Lecture> lectureOptional = lectureRepository.findById(id);
+        
+        if (lectureOptional.isPresent()) {
+            Lecture lecture = lectureOptional.get();
+            
+            if (updatedLecture.getDay() != null) lecture.setDay(updatedLecture.getDay());
+            if (updatedLecture.getCourse() != null) lecture.setCourse(updatedLecture.getCourse());
+            if (updatedLecture.getLocation() != null) lecture.setLocation(updatedLecture.getLocation());
+            if (updatedLecture.getLecturerName() != null) lecture.setLecturerName(updatedLecture.getLecturerName());
+            if (updatedLecture.getGroupName() != null) lecture.setGroupName(updatedLecture.getGroupName());
+            if (updatedLecture.getStart_time() != null) lecture.setStart_time(updatedLecture.getStart_time());
+            if (updatedLecture.getEnd_time() != null) lecture.setEnd_time(updatedLecture.getEnd_time());
+            if (updatedLecture.getTimeTableId() != null) lecture.setTimeTableId(updatedLecture.getTimeTableId());
+            if (updatedLecture.getColorId() !=null) lecture.setColorId(updatedLecture.getColorId());
+            
+            Lecture savedLecture = lectureRepository.save(lecture);
+            return ResponseEntity.ok(savedLecture);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
 }
