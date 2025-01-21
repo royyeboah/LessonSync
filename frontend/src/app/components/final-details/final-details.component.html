@@ -1,25 +1,97 @@
 <section class="flex h-screen justify-center items-center">
-  <div class="flex flex-col w-1/3 bg-gray-100 p-4 rounded-md">
+  <div class="flex flex-col mt-4 w-1/2 bg-gray-100 p-4 overflow-y-auto max-h-[90vh] rounded-md">
     <h2 class="font-bold text-xl text-gray-700">Timetable Details</h2>
     <small class="text-[12px] text-gray-600">Edit your timetable details below. Click 'Finalize Timetable' when you're ready to submit.</small>
+    <span class="text-sm text-gray-700">Extracted Timetable Content</span>
+    <div class="mt-4 bg-white font-semibold flex flex-row rounded-md p-2">
 
-    <div class="mt-4 bg-white font-semibold flex flex-col rounded-md p-2">
-      <span class="text-sm text-gray-700">Extracted Timetable Content</span>
-      <div class="flex text-gray-400 flex-row flex-wrap rounded-md justify-between">
-        <div class="flex flex-col p-2 rounded-md m-2 w-1/2 text-sm bg-gray-100">
-          <input type="text" class="text-gray-600 bg-transparent border-gray-300 focus:outline-none focus:border-gray-500" value="CSM 258">
-          <input type="date" class="bg-transparent border-gray-300 focus:outline-none focus:border-gray-500" value="2025-12-12">
-          <input type="time" class="bg-transparent border-gray-300 focus:outline-none focus:border-gray-500" value="08:00">
+      <div class="flex items-center text-gray-400 flex-wrap rounded-md justify-between">
+        <div *ngFor="let entry of lecturesMap | keyvalue; trackBy: trackByFn" class="flex flex-col p-4 rounded-md m-2 w-96 text-sm bg-gray-100">
+        <div class="mb-3">
+          <input
+            #courseInput
+            type="text"
+            class="font-bold text-gray-700 bg-transparent border-b border-gray-300 focus:outline-none focus:border-gray-500 w-full"
+            [value]="entry.key"
+            (change) = "updateCourseKey(entry.key, courseInput.value, entry.value)"
+          >
+          <button
+            class="ml-2 p-1 rounded hover:bg-gray-200 transition-colors"
+            (click)="toggleCollapse(entry.key)"
+          type="button">
+            <svg
+              [class.rotate-180]="!isCollapsed(entry.key)"
+              class="w-5 h-5 transition-transform duration-200"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
         </div>
-        <div class="flex rounded-md flex-col p-2 m-2 w-1/2 text-sm bg-gray-100">
-          <input type="text" class="text-gray-600 bg-transparent border-gray-300 focus:outline-none focus:border-gray-500" value="CSM 290">
-          <input type="date" class="bg-transparent border-gray-300 focus:outline-none focus:border-gray-500" value="2025-12-12">
-          <input type="time" class="bg-transparent border-gray-300 focus:outline-none focus:border-gray-500" value="09:00">
+          <div class="flex flex-col">
+            <input
+              type="text"
+              class="text-gray-600 bg-transparent border-b border-gray-300 focus:outline-none focus:border-gray-500"
+              [value]="entry.value[0]?.lecturerName"
+              (change)="updateLecturerName($event, entry.value)"
+            >
+          </div>
+        <div *ngIf="!isCollapsed(entry.key)">
+          <div *ngFor="let lecture of entry.value" class="mb-3 p-3 bg-white rounded shadow-sm">
+            <div class="grid grid-cols-2 gap-2">
+              <div *ngIf="lecture.groupName" class="flex flex-col">
+                <label class="text-sm text-gray-600">Group</label>
+                <input
+                  type="text"
+                  class="text-gray-600 bg-transparent border-b border-gray-300 focus:outline-none focus:border-gray-500"
+                  [(ngModel)]="lecture.groupName">
+              </div>
+              <div class="flex flex-col">
+                <label class="text-sm text-gray-600">Location</label>
+                <input
+                  type="text"
+                  class="text-gray-600 bg-transparent border-b border-gray-300 focus:outline-none focus:border-gray-500"
+                  [(ngModel)]="lecture.location">
+              </div>
+              <div class="flex flex-col">
+                <label class="text-sm text-gray-600">Start Time</label>
+                <span
+                  class="text-gray-600 cursor-pointer"
+                  (click)="toggleStartTimeInput(lecture)"
+                  *ngIf="!lecture.showStartTimeInput"
+                >
+    {{ formatTimeTo12Hour(lecture.start_time) || '--:-- --' }}
+  </span>
+                <input
+                  type="time"
+                  class="text-gray-600 bg-transparent border-b border-gray-300 focus:outline-none focus:border-gray-500"
+                  [(ngModel)]="lecture.start_time"
+                  *ngIf="lecture.showStartTimeInput"
+                  (blur)="hideStartTimeInput(lecture)"
+                />
+              </div>
+              <div class="flex flex-col">
+                <label class="text-sm text-gray-600">End Time</label>
+                <span
+                  class="text-gray-600 cursor-pointer"
+                  (click)="toggleEndTimeInput(lecture)"
+                  *ngIf="!lecture.showEndTimeInput"
+                >
+    {{ formatTimeTo12Hour(lecture.end_time) || '--:-- --' }}
+  </span>
+                <input
+                  type="time"
+                  class="text-gray-600 bg-transparent border-b border-gray-300 focus:outline-none focus:border-gray-500"
+                  [(ngModel)]="lecture.end_time"
+                  *ngIf="lecture.showEndTimeInput"
+                  (blur)="hideEndTimeInput(lecture)"
+                />
+              </div>
+
+            </div>
+          </div>
         </div>
-        <div class="flex rounded-md flex-col p-2 m-2 w-1/2 text-sm bg-gray-100">
-          <input type="text" class="text-gray-600 bg-transparent border-gray-300 focus:outline-none focus:border-gray-500" value="CSM 280">
-          <input type="date" class="bg-transparent border-gray-300 focus:outline-none focus:border-gray-500" value="2025-12-12">
-          <input type="time" class="bg-transparent border-gray-300 focus:outline-none focus:border-gray-500" value="10:00">
         </div>
       </div>
     </div>
