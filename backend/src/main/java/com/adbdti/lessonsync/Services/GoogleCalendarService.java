@@ -6,6 +6,7 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
+import com.google.api.services.calendar.model.EventReminder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +49,7 @@ public class GoogleCalendarService {
     }
 
     public String createLecture(String name, String location, String lecturer_name
-    , String start, String end) throws IOException {
+    , String start, String end, int colorId, int reminderTime) throws IOException {
 
         List<TimeTable> timeTableList = (List<TimeTable>) timeTableRepository.findAll();
         TimeTable timeTable = timeTableList.get(0);
@@ -58,6 +59,11 @@ public class GoogleCalendarService {
         event.setSummary(name);
         event.setLocation(location);
         event.setDescription(lecturer_name);
+        event.setColorId(String.valueOf(colorId));
+
+        EventReminder[] reminderOverrides = new EventReminder[] {
+                new EventReminder().setMethod("popup").setMinutes(reminderTime)
+        };
 
         LocalTime justStartTime = LocalTime.parse(start);
         LocalTime justEndTime = LocalTime.parse(end);
