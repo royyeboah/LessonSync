@@ -4,6 +4,7 @@ export interface Lecture {
   showEndTimeInput: boolean;
 
   id: string;
+  day: string;
   course: string;
   location: string;
   lecturerName: string;

@@ -3,6 +3,9 @@ import {LectureServiceService} from '../../services/lecture-service.service';
 import {Lecture} from '../../models/lecture.model';
 import {DatePipe, KeyValue, KeyValuePipe, NgForOf, NgIf} from '@angular/common';
 import {FormsModule} from '@angular/forms';
+import {Timetable} from '../../models/timetable.model';
+import {TimetableServiceService} from '../../services/timetable-service.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-final-details',
@@ -19,10 +22,19 @@ import {FormsModule} from '@angular/forms';
 })
 export class FinalDetailsComponent implements OnInit{
 
-  constructor(private lectureService: LectureServiceService) {
+  constructor(private lectureService: LectureServiceService,
+  private timetableService: TimetableServiceService,
+              private router: Router) {
   }
 
   lectures: Lecture[] = []
+  reminderTime: number = 15;
+
+  currentTimetable: Timetable = {
+    name: '',
+    startDate: '',
+    endDate: ''
+  }
 
   lecturesMap: Map<string, Lecture[]> = new Map();
 
@@ -50,12 +62,15 @@ export class FinalDetailsComponent implements OnInit{
     this.getAvailableLectures();
   }
 
+
+
   getAvailableLectures(): void {
     this.lectureService.getAllLectures().subscribe(
       {
         next: (data) => {
           this.lectures = data;
           this.groupLecturesByName();
+          this.getCurrentTimetable();
         },
         error: (error) => {
           console.error('Error fetching lectures:', error);
@@ -64,25 +79,14 @@ export class FinalDetailsComponent implements OnInit{
     );
   }
 
-  formatTime(time: string): string {
+  getCurrentTimetable(): void {
 
-    if(!time) return '';
+    this.timetableService.getCurrentTimetable().subscribe(
+      (data) => {
+        this.currentTimetable = data;
+      }
 
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
-    if (timeRegex.test(time)){
-      return time;
-    }
-
-    const date = new Date(`1970-01-01T${time}`);
-    if(!isNaN(date.getTime())){
-
-      const hours = date.getHours().toString().padStart(2, '0');
-      const minutes = date.getMinutes().toString().padStart(2, '0');
-
-      return `${hours}:${minutes}`
-    }
-
-    return '';
+    );
   }
 
   groupLecturesByName(): void {
@@ -106,6 +110,26 @@ export class FinalDetailsComponent implements OnInit{
         lecture.lecturerName = inputElement.value;
       }
     );
+  }
+
+  reconstructLectureArray(): Lecture[]{
+
+    return Array.from(this.lecturesMap.values()).flatMap(lectures=> lectures);
+  }
+
+  editLectures(): void{
+
+    this.lectures.forEach(
+    (lecture) => {
+        if (lecture.id) {
+          this.lectureService.editLectures(lecture.id, lecture).subscribe({
+            error: (error) => {
+              console.error("Failed to edit the lecture")
+            }
+          })
+        }
+  }
+    )
   }
 
   validateTimes(lecture: Lecture): void {
@@ -165,6 +189,29 @@ export class FinalDetailsComponent implements OnInit{
     const period = hours >= 12 ? 'PM' : 'AM';
     const hour12 = hours % 12 || 12; // Convert 0 or 12 to 12 for AM/PM
     return `${hour12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${period}`;
+  }
+
+  changeReminderTime(event: Event): void{
+
+    const selectedTime = event.target as HTMLSelectElement;
+    this.reminderTime = parseInt(selectedTime.value);
+  }
+
+  onSubmit(): void{
+    this.lectures = this.reconstructLectureArray();
+    this.editLectures();
+    this.lectureService.submitLectures(this.reminderTime).subscribe(
+      {
+        next: (response: any) => {
+          if(response && Array.isArray(response) && response.length>0){
+            const url = String(response[0]);
+
+            console.log(url);
+            this.router.navigate([url])
+          }
+
+        }
+      });
   }
 
 
