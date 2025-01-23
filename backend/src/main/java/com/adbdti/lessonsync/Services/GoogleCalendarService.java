@@ -11,10 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -48,53 +50,62 @@ public class GoogleCalendarService {
 
     }
 
-    public String createLecture(String name, String location, String lecturer_name
-    , String start, String end, int reminderTime) throws IOException {
-
+    public String createLecture(String name, String location, String lecturer_name,
+                                String start, String end, int reminderTime, String dayOfWeek) throws IOException {
+    
         List<TimeTable> timeTableList = (List<TimeTable>) timeTableRepository.findAll();
         TimeTable timeTable = timeTableList.get(0);
-
+    
         Event event = new Event();
-
+    
         event.setSummary(name);
         event.setLocation(location);
         event.setDescription(lecturer_name);
-
+    
         EventReminder[] reminderOverrides = new EventReminder[] {
                 new EventReminder().setMethod("popup").setMinutes(reminderTime)
         };
-
-
+    
+        Event.Reminders reminders = new Event.Reminders()
+                .setUseDefault(false)
+                .setOverrides(Arrays.asList(reminderOverrides));
+        event.setReminders(reminders);
+    
         LocalTime justStartTime = LocalTime.parse(start);
         LocalTime justEndTime = LocalTime.parse(end);
-
-        // Combine the timetable's start date with the parsed times
-        LocalDateTime firstStartTime = timeTable.getStartDate().toLocalDate().atTime(justStartTime);
-        LocalDateTime firstEndTime = timeTable.getStartDate().toLocalDate().atTime(justEndTime);
-
+    
+        // Find the next occurrence of the specified day of the week after the timetable start date
+        LocalDate startDate = timeTable.getStartDate().toLocalDate();
+        LocalDate firstLectureDate = startDate
+                .with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.valueOf(dayOfWeek.toUpperCase())));
+    
+        // Combine the first lecture date with the parsed times
+        LocalDateTime firstStartTime = firstLectureDate.atTime(justStartTime);
+        LocalDateTime firstEndTime = firstLectureDate.atTime(justEndTime);
+    
         // Format the LocalDateTime objects into RFC 3339 strings
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
         String rfc3339Start = firstStartTime.format(formatter);
         String rfc3339End = firstEndTime.format(formatter);
-
+    
         EventDateTime startTime = new EventDateTime()
                 .setDateTime(new DateTime(rfc3339Start))
                 .setTimeZone("UTC");
-
+    
         EventDateTime endTime = new EventDateTime()
                 .setDateTime(new DateTime(rfc3339End))
                 .setTimeZone("UTC");
-
-        String correctFormat = timeTable.getEndDate().format(formatter);
-        correctFormat = correctFormat.replaceAll("-","")
+    
+        String lastDay = timeTable.getEndDate().format(formatter);
+        lastDay = lastDay.replaceAll("-","")
                 .replaceAll(":","");
-
+    
         event.setStart(startTime);
         event.setEnd(endTime);
-        event.setRecurrence(List.of("RRULE:FREQ=WEEKLY;UNTIL="+correctFormat));
-
+        event.setRecurrence(List.of("RRULE:FREQ=WEEKLY;UNTIL="+lastDay));
+    
         Event recurringEvent = calendar.events().insert(timeTable.getGoogleCalendarId(), event).execute();
-
+    
         return recurringEvent.getHtmlLink();
     }
 
