@@ -16,11 +16,6 @@
           class="border block border-gray-100 p-2 text-gray-600 rounded-md focus:ring-gray-400 focus:border-gray-400 focus:outline-none" type="text" placeholder="eg. First Year First Semester"
         required>
       </div>
-      <div
-      class="text-red-600 text-sm">
-        <div *ngIf="timetableForm.controls['timetableName']?.invalid &&
-        timetableForm.controls['timetableName']?.untouched">Schedule name cannot be left blank</div>
-      </div>
       <div class="flex py-4 flex-col">
         <label class="text-sm" for="dropzone-file">Upload Schedule Image</label>
         <div class="flex flex-col my-4 items-center justify-center w-full">
