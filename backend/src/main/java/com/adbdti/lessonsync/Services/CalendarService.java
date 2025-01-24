@@ -67,8 +67,8 @@ public class CalendarService {
 
         for (Map<String, String> timetableMap : timetableList) {
             Lecture lecture = new Lecture();
-            if (timetableMap.get("course") == null || timetableMap.get("lecturer") == null) {
-                throw new IllegalArgumentException("Course and lecturer name are required");
+            if (timetableMap.get("course") == null) {
+                throw new IllegalArgumentException("Course name is required");
             }
 
             lecture.setCourse(timetableMap.get("course"));

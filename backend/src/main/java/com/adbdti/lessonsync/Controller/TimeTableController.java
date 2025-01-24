@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 public class TimeTableController {
 
@@ -18,4 +20,12 @@ public class TimeTableController {
 
         return ResponseEntity.ok(timeTableRepository.findAll());
     }
+
+    @GetMapping("timetable")
+    public ResponseEntity<TimeTable> getCurrentTimeTable(){
+        List<TimeTable> allTimeTables = (List<TimeTable>) timeTableRepository.findAll();
+        return ResponseEntity.ok(allTimeTables.get(0));
+    }
+
+
 }
