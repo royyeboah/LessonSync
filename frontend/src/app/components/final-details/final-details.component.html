@@ -1,12 +1,10 @@
 <section class="flex h-screen justify-center items-center">
-  <div class="flex flex-col mt-4 w-1/2 bg-gray-100 p-4 overflow-y-auto max-h-[90vh] rounded-md">
+  <div class="flex flex-col sm:w-full sm:h-full md:mt-4 md:w-1/2 bg-gray-100 p-4 overflow-x-hidden overflow-y-auto max-h-[100vh] md:rounded-md">
     <h2 class="font-bold text-xl text-gray-700">Timetable Details</h2>
     <small class="text-[12px] text-gray-600">Edit your timetable details below. Click 'Finalize Timetable' when you're ready to submit.</small>
-    <span class="text-sm text-gray-700">Extracted Timetable Content</span>
-    <div class="mt-4 bg-white font-semibold flex flex-row rounded-md p-2">
-
+    <div class="mt-2 font-semibold flex flex-row rounded-md md:p-2">
       <div class="flex items-center text-gray-400 flex-wrap rounded-md justify-between">
-        <div *ngFor="let entry of lecturesMap | keyvalue; trackBy: trackByFn" class="flex flex-col p-4 rounded-md m-2 w-96 text-sm bg-gray-100">
+        <div *ngFor="let entry of lecturesMap | keyvalue; trackBy: trackByFn" class="flex flex-col p-4 rounded-md w-96 text-sm bg-gray-100">
         <div class="mb-3">
           <input
             #courseInput
