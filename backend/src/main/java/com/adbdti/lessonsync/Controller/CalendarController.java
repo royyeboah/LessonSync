@@ -59,12 +59,15 @@ public class CalendarController {
                 lecture.getLecturerName(),
                 lecture.getStart_time(),
                 lecture.getEnd_time(),
-                reminderTime
+                reminderTime,
+                lecture.getDay()
             );
             eventLinks.add(eventLink);
         }
 
+        lectureRepository.deleteAll();
         timeTableRepository.deleteAll();
+
         
         return ResponseEntity.ok(eventLinks);
     }
