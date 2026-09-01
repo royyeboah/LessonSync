@@ -106,18 +106,23 @@ the landing page.
 | `google.oauth.failure-redirect-uri` | `GOOGLE_OAUTH_FAILURE_REDIRECT_URI` | `http://localhost:4200/` |
 | `app.cors.allowed-origins` | `APP_CORS_ALLOWED_ORIGINS` | `http://localhost:4200` |
 
-### Deploying behind a different domain
+### Deploying
 
-If the frontend and backend end up on different sites rather than on two ports of `localhost`, the
-session cookie has to be allowed to travel cross-site:
+A production build assumes the app and the API are served from the same origin, which keeps the
+session cookie same-site and avoids CORS altogether. That is why `apiUrl` is empty in
+`frontend/src/environments/environment.prod.ts`.
+
+If you do split them across different sites, the session cookie has to be allowed to travel
+cross-site, and the deployed origins have to be listed:
 
 ```properties
 server.servlet.session.cookie.same-site=none
 server.servlet.session.cookie.secure=true
+app.cors.allowed-origins=https://your-frontend.example.com
 ```
 
-Serving both from the same origin, with the API under `/api`, avoids the issue entirely; that is
-what `frontend/src/environments/environment.prod.ts` assumes.
+Remember to register the deployed callback URL on the OAuth client as well, and point
+`google.oauth.redirect-uri` and the two frontend redirect URIs at the deployed hosts.
 
 ## Tests
 
@@ -125,3 +130,5 @@ what `frontend/src/environments/environment.prod.ts` assumes.
 cd backend && ./mvnw test
 cd frontend && npm test
 ```
+
+The backend suite includes a check against a real Redis, which is skipped when none is running.
