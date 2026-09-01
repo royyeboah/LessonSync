@@ -35,3 +35,7 @@ build/
 /src/main/resources/application.properties
 
 /src/main/resources/credentials.json
+backend/src/main/resources/credentials.json
+
+### Google OAuth token stores (never commit user tokens) ###
+tokens/
