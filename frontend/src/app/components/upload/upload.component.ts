@@ -6,8 +6,9 @@ import {NgClass, NgIf, NgOptimizedImage} from '@angular/common';
 import {LectureServiceService} from '../../services/lecture-service.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {provideHttpClient} from '@angular/common/http';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {TimetableServiceService} from '../../services/timetable-service.service';
+import {AuthServiceService} from '../../services/auth-service.service';
 import {switchMap} from 'rxjs';
 
 @Component({
@@ -25,12 +26,42 @@ import {switchMap} from 'rxjs';
   standalone: true,
   styleUrl: './upload.component.css'
 })
-export class UploadComponent{
+export class UploadComponent implements OnInit {
 
   constructor(private sanitizer: DomSanitizer,
               private lectureService: LectureServiceService,
               private router: Router,
-              private timetableService: TimetableServiceService) {
+              private route: ActivatedRoute,
+              private timetableService: TimetableServiceService,
+              private authService: AuthServiceService) {
+  }
+
+  // null while the status check is in flight
+  googleConnected: boolean | null = null;
+  authError: string = '';
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['authError']) {
+        this.authError = 'Google sign-in failed, please try again.';
+      }
+    });
+
+    this.authService.getStatus().subscribe({
+      next: (status) => this.googleConnected = status.authenticated,
+      error: () => this.googleConnected = false
+    });
+  }
+
+  connectGoogle(): void {
+    this.authService.login('/upload');
+  }
+
+  disconnectGoogle(): void {
+    this.authService.logout().subscribe({
+      next: () => this.googleConnected = false,
+      error: () => this.googleConnected = false
+    });
   }
 
   timetable: Timetable = {
@@ -101,6 +132,11 @@ export class UploadComponent{
         this.router.navigateByUrl('/final').then(
           (navigated) => console.log('Navigation result:', navigated)
         )
+      },
+      error: (err)=>{
+        console.error('Failed to create the calendar', err);
+        this.loading = false;
+        this.error = 'Something went wrong while creating your calendar. Please try again.';
       }
     })
   }
