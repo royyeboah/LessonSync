@@ -23,12 +23,14 @@ import java.util.List;
 public class GoogleCalendarService {
 
     @Autowired
-    private Calendar calendar;
+    private GoogleCalendarClientFactory calendarClientFactory;
 
     @Autowired
     private TimeTableRepository timeTableRepository;
 
     public String createTimeTable(String name, LocalDateTime startDate, LocalDateTime endDate) throws IOException {
+
+        Calendar calendar = calendarClientFactory.forCurrentUser();
 
         List<TimeTable> timeTableList = (List<TimeTable>) timeTableRepository.findAll();
         TimeTable timeTable = timeTableList.get(0);
@@ -52,7 +54,9 @@ public class GoogleCalendarService {
 
     public String createLecture(String name, String location, String lecturer_name,
                                 String start, String end, int reminderTime, String dayOfWeek) throws IOException {
-    
+
+        Calendar calendar = calendarClientFactory.forCurrentUser();
+
         List<TimeTable> timeTableList = (List<TimeTable>) timeTableRepository.findAll();
         TimeTable timeTable = timeTableList.get(0);
     
