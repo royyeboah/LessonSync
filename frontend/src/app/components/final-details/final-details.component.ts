@@ -210,6 +210,9 @@ export class FinalDetailsComponent implements OnInit{
             this.router.navigate([url])
           }
 
+        },
+        error: (error) => {
+          console.error('Failed to create the calendar events:', error);
         }
       });
   }
