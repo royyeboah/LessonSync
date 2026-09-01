@@ -7,6 +7,7 @@ import com.adbdti.lessonsync.Repository.TimeTableRepository;
 import com.adbdti.lessonsync.Services.CalendarService;
 import com.adbdti.lessonsync.Services.GoogleCalendarService;
 import com.adbdti.lessonsync.Services.VertexAIService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,12 +49,13 @@ public class CalendarController {
 
 
     @GetMapping("/createEvents")
-    public ResponseEntity<List<String>> postAllLectures(@RequestParam Integer reminderTime) throws IOException {
+    public ResponseEntity<List<String>> postAllLectures(@RequestParam Integer reminderTime, HttpSession session) throws IOException {
         List<Lecture> lectures = (List<Lecture>) lectureRepository.findAll();
         List<String> eventLinks = new ArrayList<>();
         
         for (Lecture lecture : lectures) {
             String eventLink = googleCalendarService.createLecture(
+                session.getId(),
                 lecture.getCourse(),
                 lecture.getLocation(),
                 lecture.getLecturerName(),
@@ -73,9 +75,9 @@ public class CalendarController {
     }
 
     @PostMapping("/createCalendar")
-    public ResponseEntity<String> createCalendar(@RequestBody TimeTable timetable) throws Exception{
+    public ResponseEntity<String> createCalendar(@RequestBody TimeTable timetable, HttpSession session) throws Exception{
 
-        return ResponseEntity.ok(googleCalendarService.createTimeTable(timetable.getName(),timetable.getStartDate(), timetable.getEndDate()));
+        return ResponseEntity.ok(googleCalendarService.createTimeTable(session.getId(), timetable.getName(),timetable.getStartDate(), timetable.getEndDate()));
     }
 
     @GetMapping("/lectures")

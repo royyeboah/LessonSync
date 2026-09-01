@@ -1,5 +1,6 @@
 package com.adbdti.lessonsync.Services;
 
+import com.adbdti.lessonsync.Auth.GoogleAuthService;
 import com.adbdti.lessonsync.Model.TimeTable;
 import com.adbdti.lessonsync.Repository.TimeTableRepository;
 import com.google.api.client.util.DateTime;
@@ -23,12 +24,14 @@ import java.util.List;
 public class GoogleCalendarService {
 
     @Autowired
-    private Calendar calendar;
+    private GoogleAuthService googleAuthService;
 
     @Autowired
     private TimeTableRepository timeTableRepository;
 
-    public String createTimeTable(String name, LocalDateTime startDate, LocalDateTime endDate) throws IOException {
+    public String createTimeTable(String userKey, String name, LocalDateTime startDate, LocalDateTime endDate) throws IOException {
+
+        Calendar calendar = googleAuthService.getCalendarClient(userKey);
 
         List<TimeTable> timeTableList = (List<TimeTable>) timeTableRepository.findAll();
         TimeTable timeTable = timeTableList.get(0);
@@ -50,9 +53,11 @@ public class GoogleCalendarService {
 
     }
 
-    public String createLecture(String name, String location, String lecturer_name,
+    public String createLecture(String userKey, String name, String location, String lecturer_name,
                                 String start, String end, int reminderTime, String dayOfWeek) throws IOException {
-    
+
+        Calendar calendar = googleAuthService.getCalendarClient(userKey);
+
         List<TimeTable> timeTableList = (List<TimeTable>) timeTableRepository.findAll();
         TimeTable timeTable = timeTableList.get(0);
     
