@@ -32,6 +32,10 @@ build/
 ### VS Code ###
 .vscode
 
-/src/main/resources/application.properties
+### Secrets ###
+**/src/main/resources/application.properties
+**/src/main/resources/credentials.json
 
-/src/main/resources/credentials.json
+# Legacy on-disk OAuth token store; credentials now live in Redis
+tokens/
+
