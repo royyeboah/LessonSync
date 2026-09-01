@@ -33,7 +33,7 @@ public class GoogleOAuthFlowProvider {
             "Set google.oauth.client-id and google.oauth.client-secret (or the "
                     + "GOOGLE_OAUTH_CLIENT_ID / GOOGLE_OAUTH_CLIENT_SECRET environment variables), "
                     + "or place your downloaded credentials.json on the classpath. "
-                    + "See backend/README.md for the full setup steps.";
+                    + "See README.md for the full setup steps.";
 
     private final GoogleOAuthProperties properties;
     private final StringRedisTemplate redisTemplate;
