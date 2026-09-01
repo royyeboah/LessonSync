@@ -1,7 +1,12 @@
 package com.adbdti.lessonsync.Services;
 
+import com.adbdti.lessonsync.Auth.GoogleAccessTokenService;
 import com.adbdti.lessonsync.Model.TimeTable;
 import com.adbdti.lessonsync.Repository.TimeTableRepository;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -11,10 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
@@ -22,11 +27,29 @@ import java.util.List;
 @Service
 public class GoogleCalendarService {
 
-    @Autowired
-    private Calendar calendar;
+    private static final String APPLICATION_NAME = "LessonSync";
+    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+
+    private final GoogleAccessTokenService googleAccessTokenService;
+    private final TimeTableRepository timeTableRepository;
+    private final NetHttpTransport httpTransport;
 
     @Autowired
-    private TimeTableRepository timeTableRepository;
+    public GoogleCalendarService(GoogleAccessTokenService googleAccessTokenService,
+                                 TimeTableRepository timeTableRepository)
+            throws GeneralSecurityException, IOException {
+        this.googleAccessTokenService = googleAccessTokenService;
+        this.timeTableRepository = timeTableRepository;
+        this.httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+    }
+
+    GoogleCalendarService(GoogleAccessTokenService googleAccessTokenService,
+                          TimeTableRepository timeTableRepository,
+                          NetHttpTransport httpTransport) {
+        this.googleAccessTokenService = googleAccessTokenService;
+        this.timeTableRepository = timeTableRepository;
+        this.httpTransport = httpTransport;
+    }
 
     public String createTimeTable(String name, LocalDateTime startDate, LocalDateTime endDate) throws IOException {
 
@@ -41,7 +64,7 @@ public class GoogleCalendarService {
         googleTimeTable.setSummary(name);
         googleTimeTable.setTimeZone("UTC");
 
-        com.google.api.services.calendar.model.Calendar createdCalendar = calendar.calendars().insert(googleTimeTable).execute();
+        com.google.api.services.calendar.model.Calendar createdCalendar = calendar().calendars().insert(googleTimeTable).execute();
         timeTable.setGoogleCalendarId(createdCalendar.getId());
 
         timeTableRepository.save(timeTable);
@@ -104,12 +127,17 @@ public class GoogleCalendarService {
         event.setEnd(endTime);
         event.setRecurrence(List.of("RRULE:FREQ=WEEKLY;UNTIL="+lastDay));
     
-        Event recurringEvent = calendar.events().insert(timeTable.getGoogleCalendarId(), event).execute();
+        Event recurringEvent = calendar().events().insert(timeTable.getGoogleCalendarId(), event).execute();
     
         return recurringEvent.getHtmlLink();
     }
 
-
-
+    Calendar calendar() {
+        String accessToken = googleAccessTokenService.getAccessToken();
+        return new Calendar.Builder(httpTransport, JSON_FACTORY, request ->
+                request.getHeaders().setAuthorization("Bearer " + accessToken))
+                .setApplicationName(APPLICATION_NAME)
+                .build();
+    }
 
 }

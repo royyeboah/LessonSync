@@ -1,11 +1,41 @@
-<nav class="bg-white border-b-2 h-10 flex justify-center max">
+<nav class="bg-white border-b-2 h-14 flex justify-center items-center px-4">
   <div class="font-bold text-gray-600 text-2xl py-2">ClassSync</div>
 </nav>
 <section class="flex justify-center items-center bg-gray-50 h-screen">
   <div class="border-gray-50 items-center content-center flex flex-col h-1/2 w-1/2 border-b-2  p-2 rounded-md">
     <h1 class="text-center text-gray-900 font-semibold p-4 text-3xl">Welcome to ClassSync!</h1>
     <p class="text-center text-gray-500">Your modern and intuitive solution for class scheduling</p>
-    <a href="/upload" class="mt-4 text-white bg-gradient-to-br from-gray-800 to-gray-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-3 text-center w-1/3 me-2 mb-2">+ Create TimeTable</a>
+    <p class="text-center text-gray-500 mt-2 text-sm max-w-md">Sign in with Google so your timetable can be added to your calendar automatically. You will not need to paste an access token.</p>
+
+    <p *ngIf="oauthError" class="mt-4 text-sm text-red-600 text-center">
+      Google sign-in did not complete. Please try again.
+    </p>
+
+    <div *ngIf="loading" class="mt-6 text-gray-500 text-sm">Checking Google sign-in...</div>
+
+    <div *ngIf="!loading && status && !status.authenticated" class="mt-6 w-full flex flex-col items-center">
+      <button
+        type="button"
+        (click)="signIn()"
+        class="flex items-center justify-center gap-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium rounded-lg text-sm px-5 py-3 w-full max-w-xs shadow-sm">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="w-5 h-5" aria-hidden="true">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.16 7.09-10.36 7.09-17.65z"></path>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+        </svg>
+        Sign in with Google
+      </button>
+    </div>
+
+    <div *ngIf="!loading && status?.authenticated" class="mt-6 w-full flex flex-col items-center gap-3">
+      <div class="flex items-center gap-3 text-sm text-gray-600">
+        <img *ngIf="status?.picture" [src]="status?.picture" alt="" class="w-8 h-8 rounded-full">
+        <span>Signed in as {{ status?.email }}</span>
+      </div>
+      <a routerLink="/upload" class="mt-2 text-white bg-gradient-to-br from-gray-800 to-gray-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-3 text-center w-1/3 me-2 mb-2">+ Create TimeTable</a>
+      <button type="button" (click)="signOut()" class="text-sm text-gray-500 hover:text-gray-800 underline">Sign out</button>
+    </div>
   </div>
 
 </section>
