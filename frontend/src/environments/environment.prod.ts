@@ -2,5 +2,5 @@
 // For local production builds: API_URL=http://localhost:8080 node scripts/write-environment.mjs
 export const environment = {
   production: true,
-  apiUrl: ''
+  apiUrl: 'https://lessonsync-production.up.railway.app/'
 };
