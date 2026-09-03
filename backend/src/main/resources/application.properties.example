@@ -1,5 +1,8 @@
-# Copy this file to application.properties and fill in your own values.
-# application.properties is git-ignored so your secrets stay on your machine.
+# Copy this file to application-local.properties and fill in your own values.
+# application-local.properties is git-ignored so your secrets stay on your machine.
+#
+# Deployments should leave this file alone and set the environment variables
+# listed in README.md instead.
 
 spring.application.name=LessonSync
 
@@ -30,3 +33,4 @@ app.cors.allowed-origins=http://localhost:4200
 # --- Vertex AI --------------------------------------------------------------
 # Schedule images are read by Gemini through Application Default Credentials, so
 # run `gcloud auth application-default login` or set GOOGLE_APPLICATION_CREDENTIALS.
+# On Railway, paste the service account JSON into GOOGLE_APPLICATION_CREDENTIALS_JSON.

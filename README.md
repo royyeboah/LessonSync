@@ -33,15 +33,14 @@ refresh token that comes back is stored on disk and used to mint access tokens a
    port, and lack of a trailing slash.
 3. On the **OAuth consent screen**, add the scopes `.../auth/calendar`, `openid`, `email`, and
    `profile`. While the app is in testing mode, add yourself under **Test users**.
-4. Copy the client ID and secret into the backend configuration:
+4. Copy the client ID and secret into a local override (git-ignored):
 
    ```bash
    cp backend/src/main/resources/application.properties.example \
-      backend/src/main/resources/application.properties
+      backend/src/main/resources/application-local.properties
    ```
 
    then fill in `google.oauth.client-id` and `google.oauth.client-secret`.
-   `application.properties` is git-ignored.
 
    You can also leave those two properties out and export the values instead, which is the better
    option for deployments:
@@ -52,7 +51,8 @@ refresh token that comes back is stored on disk and used to mint access tokens a
    ```
 
    A `credentials.json` downloaded from the console still works too: put it on the classpath at
-   `backend/src/main/resources/credentials.json` and leave the two properties unset.
+   `backend/src/main/resources/credentials.json` and leave the two properties unset. On Railway,
+   paste that same file into the `GOOGLE_OAUTH_CREDENTIALS_JSON` variable instead.
 
 Vertex AI authenticates separately, through Application Default Credentials:
 
@@ -100,32 +100,69 @@ the landing page.
 | --- | --- | --- |
 | `google.oauth.client-id` | `GOOGLE_OAUTH_CLIENT_ID` | — |
 | `google.oauth.client-secret` | `GOOGLE_OAUTH_CLIENT_SECRET` | — |
+| `google.oauth.credentials-json` | `GOOGLE_OAUTH_CREDENTIALS_JSON` | — |
 | `google.oauth.redirect-uri` | `GOOGLE_OAUTH_REDIRECT_URI` | `http://localhost:8080/auth/google/callback` |
 | `google.oauth.success-redirect-uri` | `GOOGLE_OAUTH_SUCCESS_REDIRECT_URI` | `http://localhost:4200/` |
 | `google.oauth.failure-redirect-uri` | `GOOGLE_OAUTH_FAILURE_REDIRECT_URI` | `http://localhost:4200/` |
 | `google.oauth.token-store-directory` | `GOOGLE_OAUTH_TOKEN_STORE_DIRECTORY` | `tokens` |
 | `app.cors.allowed-origins` | `APP_CORS_ALLOWED_ORIGINS` | `http://localhost:4200` |
+| `server.servlet.session.cookie.same-site` | `SESSION_COOKIE_SAME_SITE` | `lax` |
+| `server.servlet.session.cookie.secure` | `SESSION_COOKIE_SECURE` | `false` |
+| `vertex.project-id` | `VERTEX_PROJECT_ID` | `class-scheduler-429214` |
+| `vertex.location` | `VERTEX_LOCATION` | `us-central1` |
+| `vertex.model` | `VERTEX_MODEL` | `gemini-2.0-flash-exp` |
 
-### Deploying
+### Deploying to Vercel + Railway
 
-A production build assumes the app and the API are served from the same origin, which keeps the
-session cookie same-site and avoids CORS altogether. That is why `apiUrl` is empty in
-`frontend/src/environments/environment.prod.ts`.
+The frontend is an Angular 19 app. Its production files land in `dist/lesson-sync/browser`, not
+`dist/lesson-sync`. Pointing Vercel at the repo root (or at the parent `dist` folder) produces the
+platform `404: NOT_FOUND` page. This repo now includes `vercel.json` files that set the output
+directory and rewrite every route to `index.html`.
 
-If you do split them across different sites, the session cookie has to be allowed to travel
-cross-site, and the deployed origins have to be listed:
+1. In the Vercel project, set **Root Directory** to `frontend` (or leave it at the repo root; the
+   root `vercel.json` builds the frontend either way).
+2. Redeploy. The home page should render instead of `NOT_FOUND`.
+3. Add a Vercel environment variable named `API_URL` with your Railway origin, for example
+   `https://lessonsync-production.up.railway.app` (no trailing slash). The production build writes
+   that value into `environment.prod.ts` so the app calls Railway instead of the Vercel origin.
 
-```properties
-server.servlet.session.cookie.same-site=none
-server.servlet.session.cookie.secure=true
-app.cors.allowed-origins=https://your-frontend.example.com
+On Railway, set the service **Root Directory** to `backend` (recommended) or deploy from the repo
+root. Either way Nixpacks builds the Spring Boot jar and `start.sh` launches it. Railway injects
+`PORT`; the app already binds to `${PORT:8080}`.
+
+Then set these Railway variables. None of them can live in git: `application.properties` only
+contains placeholders, and `credentials.json` is git-ignored.
+
+| Variable | Value |
+| --- | --- |
+| `GOOGLE_OAUTH_CLIENT_ID` | OAuth client ID from Google Cloud |
+| `GOOGLE_OAUTH_CLIENT_SECRET` | OAuth client secret |
+| `GOOGLE_OAUTH_REDIRECT_URI` | `https://<your-railway-host>/auth/google/callback` |
+| `GOOGLE_OAUTH_SUCCESS_REDIRECT_URI` | `https://<your-vercel-host>/` |
+| `GOOGLE_OAUTH_FAILURE_REDIRECT_URI` | `https://<your-vercel-host>/` |
+| `APP_CORS_ALLOWED_ORIGINS` | `https://<your-vercel-host>` |
+| `SESSION_COOKIE_SAME_SITE` | `none` |
+| `SESSION_COOKIE_SECURE` | `true` |
+| `GOOGLE_APPLICATION_CREDENTIALS_JSON` | Full JSON of a Vertex AI **service account** key |
+| `VERTEX_PROJECT_ID` | GCP project id (if it is not `class-scheduler-429214`) |
+
+`GOOGLE_APPLICATION_CREDENTIALS_JSON` is a service account key (**IAM > Service accounts > Keys**),
+not the OAuth client JSON. Vertex AI does not run on Railway without it; the usual error is
+`The Application Default Credentials are not available`.
+
+Alternatively, paste the downloaded OAuth client JSON into `GOOGLE_OAUTH_CREDENTIALS_JSON` instead
+of setting the client id and secret separately.
+
+On the Google OAuth client, add the Railway callback under **Authorized redirect URIs**:
+
+```
+https://<your-railway-host>/auth/google/callback
 ```
 
-Remember to register the deployed callback URL on the OAuth client as well, and point
-`google.oauth.redirect-uri` and the two frontend redirect URIs at the deployed hosts.
+and add the Vercel origin under **Authorized JavaScript origins**.
 
-Because timetables and tokens are held per instance, run a single instance, or add sticky sessions
-and a shared volume for `google.oauth.token-store-directory`.
+Because timetables and tokens are held per instance, run a single Railway replica, or add sticky
+sessions and a shared volume for `google.oauth.token-store-directory`.
 
 ## Tests
 

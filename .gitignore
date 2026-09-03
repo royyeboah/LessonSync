@@ -33,7 +33,9 @@ build/
 .vscode
 
 ### Secrets ###
-**/src/main/resources/application.properties
+# application.properties is committed with env-var placeholders only.
+# Put real secrets in application-local.properties or the host environment.
+**/src/main/resources/application-local.properties
 **/src/main/resources/credentials.json
 
 # Legacy on-disk OAuth token store; credentials now live in Redis

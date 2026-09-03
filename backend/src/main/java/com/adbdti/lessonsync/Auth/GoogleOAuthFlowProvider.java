@@ -33,7 +33,8 @@ public class GoogleOAuthFlowProvider {
     private static final String SETUP_HINT =
             "Set google.oauth.client-id and google.oauth.client-secret (or the "
                     + "GOOGLE_OAUTH_CLIENT_ID / GOOGLE_OAUTH_CLIENT_SECRET environment variables), "
-                    + "or place your downloaded credentials.json on the classpath. "
+                    + "or set GOOGLE_OAUTH_CREDENTIALS_JSON to the contents of your downloaded "
+                    + "OAuth client JSON, or place credentials.json on the classpath. "
                     + "See README.md for the full setup steps.";
 
     private final GoogleOAuthProperties properties;
@@ -49,7 +50,7 @@ public class GoogleOAuthFlowProvider {
 
     @PostConstruct
     void warnIfUnconfigured() {
-        if (!properties.hasInlineClientSecrets() && !credentialsFileExists()) {
+        if (!isConfigured()) {
             log.warn("Google OAuth is not configured, so calendar features will be unavailable. {}", SETUP_HINT);
         }
     }
@@ -98,7 +99,9 @@ public class GoogleOAuthFlowProvider {
     }
 
     public boolean isConfigured() {
-        return properties.hasInlineClientSecrets() || credentialsFileExists();
+        return properties.hasInlineClientSecrets()
+                || properties.hasCredentialsJson()
+                || credentialsFileExists();
     }
 
     private GoogleAuthorizationCodeFlow buildFlow() {
@@ -122,6 +125,19 @@ public class GoogleOAuthFlowProvider {
                     .setClientSecret(properties.getClientSecret())
                     .setRedirectUris(java.util.List.of(properties.getRedirectUri()));
             return new GoogleClientSecrets().setWeb(details);
+        }
+
+        if (properties.hasCredentialsJson()) {
+            try {
+                return GoogleClientSecrets.load(
+                        jsonFactory, new InputStreamReader(
+                                new java.io.ByteArrayInputStream(
+                                        properties.getCredentialsJson()
+                                                .getBytes(java.nio.charset.StandardCharsets.UTF_8))));
+            } catch (IOException e) {
+                throw new GoogleOAuthNotConfiguredException(
+                        "Unable to parse GOOGLE_OAUTH_CREDENTIALS_JSON. " + SETUP_HINT, e);
+            }
         }
 
         try (InputStream in = openCredentialsFile()) {

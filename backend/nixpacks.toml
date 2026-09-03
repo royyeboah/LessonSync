@@ -1,0 +1,10 @@
+providers = ["java"]
+
+[variables]
+NIXPACKS_JDK_VERSION = "17"
+
+[phases.build]
+cmds = ["./mvnw -DskipTests package"]
+
+[start]
+cmd = "bash start.sh"
