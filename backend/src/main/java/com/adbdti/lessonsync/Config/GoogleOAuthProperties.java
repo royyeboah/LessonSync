@@ -42,9 +42,10 @@ public class GoogleOAuthProperties {
     private String credentialsFile = "/credentials.json";
 
     /**
-     * Redis key prefix under which refresh tokens are persisted.
+     * Directory in which refresh tokens are persisted, so that a restart does not force every
+     * student to grant consent again. Keep it out of version control.
      */
-    private String tokenStorePrefix = "lessonsync:oauth";
+    private String tokenStoreDirectory = "tokens";
 
     public String getClientId() {
         return clientId;
@@ -102,12 +103,12 @@ public class GoogleOAuthProperties {
         this.credentialsFile = credentialsFile;
     }
 
-    public String getTokenStorePrefix() {
-        return tokenStorePrefix;
+    public String getTokenStoreDirectory() {
+        return tokenStoreDirectory;
     }
 
-    public void setTokenStorePrefix(String tokenStorePrefix) {
-        this.tokenStorePrefix = tokenStorePrefix;
+    public void setTokenStoreDirectory(String tokenStoreDirectory) {
+        this.tokenStoreDirectory = tokenStoreDirectory;
     }
 
     public boolean hasInlineClientSecrets() {

@@ -7,12 +7,13 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.util.store.FileDataStoreFactory;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -36,16 +37,14 @@ public class GoogleOAuthFlowProvider {
                     + "See README.md for the full setup steps.";
 
     private final GoogleOAuthProperties properties;
-    private final StringRedisTemplate redisTemplate;
 
     private final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
 
     private volatile GoogleAuthorizationCodeFlow flow;
     private volatile NetHttpTransport httpTransport;
 
-    public GoogleOAuthFlowProvider(GoogleOAuthProperties properties, StringRedisTemplate redisTemplate) {
+    public GoogleOAuthFlowProvider(GoogleOAuthProperties properties) {
         this.properties = properties;
-        this.redisTemplate = redisTemplate;
     }
 
     @PostConstruct
@@ -107,7 +106,8 @@ public class GoogleOAuthFlowProvider {
         try {
             return new GoogleAuthorizationCodeFlow.Builder(
                     getHttpTransport(), jsonFactory, clientSecrets, properties.getScopes())
-                    .setDataStoreFactory(new RedisDataStoreFactory(redisTemplate, properties.getTokenStorePrefix()))
+                    .setDataStoreFactory(
+                            new FileDataStoreFactory(new File(properties.getTokenStoreDirectory())))
                     .setAccessType("offline")
                     .build();
         } catch (IOException e) {

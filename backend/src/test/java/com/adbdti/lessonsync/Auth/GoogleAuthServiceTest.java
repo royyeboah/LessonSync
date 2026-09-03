@@ -64,11 +64,11 @@ class GoogleAuthServiceTest {
 
     @Test
     void loadCredentialFailsWhenTheStoreCannotBeRead() throws IOException {
-        given(flow.loadCredential("user-1")).willThrow(new IOException("redis is down"));
+        given(flow.loadCredential("user-1")).willThrow(new IOException("token store is unreadable"));
 
         assertThatThrownBy(() -> service.loadCredential("user-1"))
                 .isInstanceOf(GoogleAuthRequiredException.class)
-                .hasMessageContaining("redis is down");
+                .hasMessageContaining("token store is unreadable");
     }
 
     @Test
