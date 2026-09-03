@@ -108,24 +108,52 @@ the landing page.
 
 ### Deploying
 
-A production build assumes the app and the API are served from the same origin, which keeps the
-session cookie same-site and avoids CORS altogether. That is why `apiUrl` is empty in
-`frontend/src/environments/environment.prod.ts`.
+#### Frontend on Vercel
 
-If you do split them across different sites, the session cookie has to be allowed to travel
-cross-site, and the deployed origins have to be listed:
+Set the Vercel project **Root Directory** to `frontend`.
+
+Add an environment variable:
+
+| Variable | Example | Purpose |
+| --- | --- | --- |
+| `API_URL` | `https://your-api.example.com` | URL of the Spring Boot backend |
+
+`API_URL` is written into the production build before `ng build` runs. Without it, the homepage
+loads but **Connect Google Calendar** cannot work because the browser would try to open
+`/auth/google/login` on Vercel itself, which the SPA rewrite turns into a blank page.
+
+#### Backend
+
+Deploy the Spring Boot app separately (Railway, Render, Fly.io, a VM, etc.) and configure:
+
+| Property / variable | Production value |
+| --- | --- |
+| `google.oauth.redirect-uri` / `GOOGLE_OAUTH_REDIRECT_URI` | `https://your-api.example.com/auth/google/callback` |
+| `google.oauth.success-redirect-uri` / `GOOGLE_OAUTH_SUCCESS_REDIRECT_URI` | `https://your-frontend.vercel.app/` |
+| `google.oauth.failure-redirect-uri` / `GOOGLE_OAUTH_FAILURE_REDIRECT_URI` | `https://your-frontend.vercel.app/` |
+| `app.cors.allowed-origins` / `APP_CORS_ALLOWED_ORIGINS` | `https://your-frontend.vercel.app` |
+
+In the [Google Cloud console](https://console.cloud.google.com/apis/credentials), on your OAuth
+client, add the production callback URI under **Authorized redirect URIs**. Enable the **Google
+Calendar API** and **Vertex AI API** for the project.
+
+Because the frontend and API are on different sites, the session cookie must be allowed to travel
+cross-site:
 
 ```properties
 server.servlet.session.cookie.same-site=none
 server.servlet.session.cookie.secure=true
-app.cors.allowed-origins=https://your-frontend.example.com
+app.cors.allowed-origins=https://your-frontend.vercel.app
 ```
-
-Remember to register the deployed callback URL on the OAuth client as well, and point
-`google.oauth.redirect-uri` and the two frontend redirect URIs at the deployed hosts.
 
 Because timetables and tokens are held per instance, run a single instance, or add sticky sessions
 and a shared volume for `google.oauth.token-store-directory`.
+
+#### Same-origin deployment
+
+If you serve the built Angular app and the API from the same origin instead, leave `API_URL` unset
+and keep `apiUrl` empty in `frontend/src/environments/environment.prod.ts`. That keeps the session
+cookie same-site and avoids CORS entirely.
 
 ## Tests
 

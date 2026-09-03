@@ -1,5 +1,5 @@
-// A production build is expected to be served from the same origin as the API, which keeps the
-// session cookie same-site and avoids CORS entirely.
+// Overwritten by scripts/write-environment.mjs during production builds.
+// For local production builds: API_URL=http://localhost:8080 node scripts/write-environment.mjs
 export const environment = {
   production: true,
   apiUrl: ''

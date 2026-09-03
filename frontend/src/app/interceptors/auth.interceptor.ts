@@ -13,8 +13,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // In a same-origin production build apiUrl is empty, which makes every request an API request.
-  const isApiRequest = req.url.startsWith(environment.apiUrl);
+  const isApiRequest = environment.apiUrl
+    ? req.url.startsWith(environment.apiUrl)
+    : req.url.startsWith('/') && !req.url.startsWith('/assets');
   const request = isApiRequest ? req.clone({ withCredentials: true }) : req;
 
   return next(request).pipe(

@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {NgIf} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AuthService, GoogleAuthStatus} from '../../services/auth.service';
+import {environment} from '../../../environments/environment';
 
 @Component({
   selector: 'app-welcome',
@@ -15,6 +16,7 @@ export class WelcomeComponent implements OnInit {
   status: GoogleAuthStatus | null = null;
   loading = true;
   errorMessage = '';
+  backendNotConfigured = environment.production && !environment.apiUrl;
 
   constructor(private authService: AuthService,
               private route: ActivatedRoute,
@@ -30,7 +32,12 @@ export class WelcomeComponent implements OnInit {
   }
 
   connect(): void {
-    this.authService.login();
+    try {
+      this.authService.login();
+    } catch {
+      this.errorMessage =
+        'The backend URL is not configured for this deployment. Set the API_URL environment variable in Vercel to your Spring Boot server URL, then redeploy.';
+    }
   }
 
   disconnect(): void {
