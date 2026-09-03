@@ -16,16 +16,16 @@ public class TimeTableController {
     private TimeTableRepository timeTableRepository;
 
     @GetMapping("timetables")
-    public ResponseEntity<Iterable<TimeTable>> getAllTimeTables(){
+    public ResponseEntity<List<TimeTable>> getAllTimeTables(){
 
         return ResponseEntity.ok(timeTableRepository.findAll());
     }
 
     @GetMapping("timetable")
     public ResponseEntity<TimeTable> getCurrentTimeTable(){
-        List<TimeTable> allTimeTables = (List<TimeTable>) timeTableRepository.findAll();
-        return ResponseEntity.ok(allTimeTables.get(0));
+        return timeTableRepository.findCurrent()
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
-
 
 }

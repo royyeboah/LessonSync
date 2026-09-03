@@ -23,15 +23,16 @@ import java.util.List;
 public class GoogleCalendarService {
 
     @Autowired
-    private Calendar calendar;
+    private GoogleCalendarClientFactory calendarClientFactory;
 
     @Autowired
     private TimeTableRepository timeTableRepository;
 
     public String createTimeTable(String name, LocalDateTime startDate, LocalDateTime endDate) throws IOException {
 
-        List<TimeTable> timeTableList = (List<TimeTable>) timeTableRepository.findAll();
-        TimeTable timeTable = timeTableList.get(0);
+        Calendar calendar = calendarClientFactory.forCurrentUser();
+
+        TimeTable timeTable = currentTimeTable();
         timeTable.setName(name);
         timeTable.setStartDate(startDate);
         timeTable.setEndDate(endDate);
@@ -52,10 +53,11 @@ public class GoogleCalendarService {
 
     public String createLecture(String name, String location, String lecturer_name,
                                 String start, String end, int reminderTime, String dayOfWeek) throws IOException {
-    
-        List<TimeTable> timeTableList = (List<TimeTable>) timeTableRepository.findAll();
-        TimeTable timeTable = timeTableList.get(0);
-    
+
+        Calendar calendar = calendarClientFactory.forCurrentUser();
+
+        TimeTable timeTable = currentTimeTable();
+
         Event event = new Event();
     
         event.setSummary(name);
@@ -107,6 +109,12 @@ public class GoogleCalendarService {
         Event recurringEvent = calendar.events().insert(timeTable.getGoogleCalendarId(), event).execute();
     
         return recurringEvent.getHtmlLink();
+    }
+
+    private TimeTable currentTimeTable() {
+        return timeTableRepository.findCurrent()
+                .orElseThrow(() -> new IllegalStateException(
+                        "No timetable has been uploaded in this session yet."));
     }
 
 

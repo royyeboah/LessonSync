@@ -1,25 +1,18 @@
 package com.adbdti.lessonsync.Model;
 
-import jakarta.persistence.*;
-import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.redis.core.index.Indexed;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@RedisHash("timetable")
 public class TimeTable implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Id
     private String id;
 
-    @Indexed
     private String name;
 
     private LocalDateTime startDate;

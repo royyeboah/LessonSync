@@ -1,0 +1,32 @@
+# Copy this file to application.properties and fill in your own values.
+# application.properties is git-ignored so your secrets stay on your machine.
+
+spring.application.name=LessonSync
+
+# --- Google OAuth 2.0 -------------------------------------------------------
+# Create an OAuth client of type "Web application" in the Google Cloud console
+# (APIs & Services > Credentials) and register the redirect URI below on it.
+#
+# These two can also be supplied as the GOOGLE_OAUTH_CLIENT_ID and
+# GOOGLE_OAUTH_CLIENT_SECRET environment variables instead of being written here.
+google.oauth.client-id=your-client-id.apps.googleusercontent.com
+google.oauth.client-secret=your-client-secret
+
+# Must match an "Authorized redirect URI" on the OAuth client, character for character.
+google.oauth.redirect-uri=http://localhost:8080/auth/google/callback
+
+# Where the browser lands once the callback has been handled.
+google.oauth.success-redirect-uri=http://localhost:4200/
+google.oauth.failure-redirect-uri=http://localhost:4200/
+
+# Directory holding the refresh tokens, so a restart does not force everyone to
+# grant consent again. Keep it out of version control.
+google.oauth.token-store-directory=tokens
+
+# --- Frontend ---------------------------------------------------------------
+# Origins allowed to call the API with the session cookie attached.
+app.cors.allowed-origins=http://localhost:4200
+
+# --- Vertex AI --------------------------------------------------------------
+# Schedule images are read by Gemini through Application Default Credentials, so
+# run `gcloud auth application-default login` or set GOOGLE_APPLICATION_CREDENTIALS.

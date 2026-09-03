@@ -49,7 +49,7 @@ public class CalendarController {
 
     @GetMapping("/createEvents")
     public ResponseEntity<List<String>> postAllLectures(@RequestParam Integer reminderTime) throws IOException {
-        List<Lecture> lectures = (List<Lecture>) lectureRepository.findAll();
+        List<Lecture> lectures = lectureRepository.findAll();
         List<String> eventLinks = new ArrayList<>();
         
         for (Lecture lecture : lectures) {
@@ -80,7 +80,7 @@ public class CalendarController {
 
     @GetMapping("/lectures")
     public List<Lecture> getAllLectures(){
-        return (List<Lecture>) lectureRepository.findAll();
+        return lectureRepository.findAll();
     }
 
     @PutMapping("/lecture/{id}")

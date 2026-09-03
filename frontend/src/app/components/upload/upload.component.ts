@@ -101,6 +101,13 @@ export class UploadComponent{
         this.router.navigateByUrl('/final').then(
           (navigated) => console.log('Navigation result:', navigated)
         )
+      },
+      error: (err)=>{
+        this.loading = false;
+        // A 401 is handled by the auth interceptor, which routes back to the landing page.
+        if(err?.status !== 401){
+          this.error = "Something went wrong while creating your calendar. Please try again.";
+        }
       }
     })
   }

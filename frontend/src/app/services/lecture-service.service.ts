@@ -3,6 +3,7 @@ import {Observable} from 'rxjs';
 import {Lecture} from '../models/lecture.model';
 import {Timetable} from '../models/timetable.model';
 import {HttpClient, HttpParams} from '@angular/common/http';
+import {environment} from '../../environments/environment';
 
 
 @Injectable({
@@ -12,7 +13,7 @@ export class LectureServiceService {
 
   constructor(private http: HttpClient) {}
 
-  private apiUrl = 'http://localhost:8080';
+  private apiUrl = environment.apiUrl;
 
   createLecture(file: File):Observable<any>{
 
