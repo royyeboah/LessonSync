@@ -81,12 +81,13 @@ export class FinalDetailsComponent implements OnInit{
 
   getCurrentTimetable(): void {
 
-    this.timetableService.getCurrentTimetable().subscribe(
-      (data) => {
+    this.timetableService.getCurrentTimetable().subscribe({
+      next: (data) => {
         this.currentTimetable = data;
-      }
-
-    );
+      },
+      // 404 means nothing has been uploaded in this session, so there is nothing to show.
+      error: () => this.router.navigateByUrl('/upload')
+    });
   }
 
   groupLecturesByName(): void {
