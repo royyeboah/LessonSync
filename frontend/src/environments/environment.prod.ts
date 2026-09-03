@@ -2,5 +2,5 @@
 // session cookie same-site and avoids CORS entirely.
 export const environment = {
   production: true,
-  apiUrl: ''
+  apiUrl: 'https://lessonsync-production.up.railway.app/'
 };
