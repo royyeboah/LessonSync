@@ -32,8 +32,7 @@ public class GoogleCalendarService {
 
         Calendar calendar = calendarClientFactory.forCurrentUser();
 
-        List<TimeTable> timeTableList = (List<TimeTable>) timeTableRepository.findAll();
-        TimeTable timeTable = timeTableList.get(0);
+        TimeTable timeTable = currentTimeTable();
         timeTable.setName(name);
         timeTable.setStartDate(startDate);
         timeTable.setEndDate(endDate);
@@ -57,9 +56,8 @@ public class GoogleCalendarService {
 
         Calendar calendar = calendarClientFactory.forCurrentUser();
 
-        List<TimeTable> timeTableList = (List<TimeTable>) timeTableRepository.findAll();
-        TimeTable timeTable = timeTableList.get(0);
-    
+        TimeTable timeTable = currentTimeTable();
+
         Event event = new Event();
     
         event.setSummary(name);
@@ -111,6 +109,12 @@ public class GoogleCalendarService {
         Event recurringEvent = calendar.events().insert(timeTable.getGoogleCalendarId(), event).execute();
     
         return recurringEvent.getHtmlLink();
+    }
+
+    private TimeTable currentTimeTable() {
+        return timeTableRepository.findCurrent()
+                .orElseThrow(() -> new IllegalStateException(
+                        "No timetable has been uploaded in this session yet."));
     }
 
 

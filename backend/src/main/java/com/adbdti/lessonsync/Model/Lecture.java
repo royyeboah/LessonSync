@@ -1,19 +1,11 @@
 package com.adbdti.lessonsync.Model;
 
-import jakarta.persistence.*;
-import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.redis.core.index.Indexed;
-
-@RedisHash("lecture")
 public class Lecture {
 
-    @Id
     private String id;
 
-    @Indexed
     private String day;
 
-    @Indexed
     private String course;
 
     public Integer getReminderTime() {
@@ -28,7 +20,6 @@ public class Lecture {
 
     private String location;
 
-    @Indexed
     private String lecturerName;
 
     private String groupName;
