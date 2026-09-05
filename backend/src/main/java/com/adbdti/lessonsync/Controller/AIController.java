@@ -23,9 +23,4 @@ public class AIController {
 
         return vertexAIService.generateContent(file);
     }
-
-    @GetMapping("/debug")
-    public String getDebugInfo(){
-        return vertexAIService.getRawResponse();
-    }
 }

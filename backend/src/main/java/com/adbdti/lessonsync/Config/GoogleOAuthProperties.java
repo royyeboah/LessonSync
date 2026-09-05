@@ -42,6 +42,12 @@ public class GoogleOAuthProperties {
     private String credentialsFile = "/credentials.json";
 
     /**
+     * Contents of a downloaded OAuth client JSON, supplied as
+     * {@code GOOGLE_OAUTH_CREDENTIALS_JSON} when a host cannot mount a file.
+     */
+    private String credentialsJson;
+
+    /**
      * Directory in which refresh tokens are persisted, so that a restart does not force every
      * student to grant consent again. Keep it out of version control.
      */
@@ -103,6 +109,14 @@ public class GoogleOAuthProperties {
         this.credentialsFile = credentialsFile;
     }
 
+    public String getCredentialsJson() {
+        return credentialsJson;
+    }
+
+    public void setCredentialsJson(String credentialsJson) {
+        this.credentialsJson = credentialsJson;
+    }
+
     public String getTokenStoreDirectory() {
         return tokenStoreDirectory;
     }
@@ -114,5 +128,9 @@ public class GoogleOAuthProperties {
     public boolean hasInlineClientSecrets() {
         return clientId != null && !clientId.isBlank()
                 && clientSecret != null && !clientSecret.isBlank();
+    }
+
+    public boolean hasCredentialsJson() {
+        return credentialsJson != null && !credentialsJson.isBlank();
     }
 }

@@ -1,0 +1,9 @@
+[build]
+builder = "NIXPACKS"
+watchPatterns = ["backend/**"]
+
+[deploy]
+startCommand = "bash backend/start.sh"
+healthcheckPath = "/auth/google/status"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"
