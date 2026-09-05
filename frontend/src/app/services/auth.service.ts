@@ -47,6 +47,9 @@ export class AuthService {
    * than an XHR so that the session cookie is in place when Google redirects back.
    */
   login(): void {
+    if (environment.production && !environment.apiUrl) {
+      throw new Error('API_URL is not configured for this deployment.');
+    }
     window.location.href = `${this.authUrl}/login`;
   }
 
